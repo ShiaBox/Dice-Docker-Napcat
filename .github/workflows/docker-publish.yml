@@ -18,41 +18,22 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: 查找最大版本号
-        id: find_version
+      - name: 读取版本号文件
+        id: read_version
         run: |
-          echo "当前工作目录: $(pwd)"
-          echo "正在搜索目录: ${{ env.DLL_SEARCH_PATH }}"
-          
-          # 调试：显示找到的文件列表
-          find "${{ env.DLL_SEARCH_PATH }}" -name "*.dll" | while read -r file; do
-            echo "找到文件: $file"
-          done
-          
-          max_version=0
-          for file in $(find "${{ env.DLL_SEARCH_PATH }}" -name "*.dll"); do
-            echo "正在处理文件: $file"
-            
-            # 使用兼容性更强的正则表达式
-            version=$(basename "$file" | sed -nE 's/.*$(.*)$/\1/p' | grep -E '^[0-9]+$' || echo "0")
-            echo "提取到的版本号: $version"
-            
-            # 数值比较
-            if [ "$version" -gt "$max_version" ]; then
-              max_version=$version
-              echo "更新最大版本号为: $max_version"
-            fi
-          done
-          
-          if [ "$max_version" -eq 0 ]; then
-            echo "::error::未找到有效版本号 (示例期待文件名格式：filename(638).dll)"
-            echo "找到的文件列表："
-            find "${{ env.DLL_SEARCH_PATH }}" -name "*.dll" -ls
+          if [ ! -f "last_release.txt" ]; then
+            echo "::error::last_release.txt 文件不存在"
             exit 1
           fi
           
-          echo "最终确定版本号: $max_version"
-          echo "VERSION_TAG=$max_version" >> $GITHUB_ENV
+          VERSION_TAG=$(cat last_release.txt | tr -d '\n\r' | grep -Eo '[0-9]+')
+          if [ -z "$VERSION_TAG" ]; then
+            echo "::error::last_release.txt 中未找到有效版本号"
+            exit 1
+          fi
+          
+          echo "版本号: $VERSION_TAG"
+          echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
