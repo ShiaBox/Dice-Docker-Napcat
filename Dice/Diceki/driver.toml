@@ -1,0 +1,4 @@
+[onebot]
+platform='QQ'
+impl='ShiaDiceFlats'
+ws='napcat:15801'
