@@ -33,7 +33,7 @@ fi\n\
     NAPCAT_CONF="/app/napcat/config/onebot11_${ACCOUNT:-123456}.json"\n\
     if [ ! -f "${NAPCAT_CONF}" ]; then\n\
         mkdir -p /app/napcat/config\n\
-        cp "/opt/backup-app/napcat/config/config-example.json" "${NAPCAT_CONF}"\n\
+        cp "/opt/backup/napcat/config/config-example.json" "${NAPCAT_CONF}"\n\
         echo "已生成 NapCat 配置文件：${NAPCAT_CONF}"\n\
     else\n\
         echo "检测到已有 NapCat 配置文件，保留用户修改：${NAPCAT_CONF}"\n\

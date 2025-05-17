@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   dice:
     image: shiaworkshop/dice:latest
@@ -20,6 +18,7 @@ services:
   napcat:
     image: mlikiowa/napcat-docker:latest
     container_name: napcat
+    hostname: ShiaDiceFlats
     ports:
       - "6099:6099"
     volumes:
@@ -35,5 +34,5 @@ services:
     mac_address: "02:42:8f:51:b2:a1"
 
 networks:
-  dice-network:
+  dice:
     driver: bridge
