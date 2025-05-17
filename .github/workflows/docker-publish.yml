@@ -21,21 +21,34 @@ jobs:
       - name: 查找最大版本号
         id: find_version
         run: |
-          # 查找所有.dll文件并提取版本号
+          echo "当前工作目录: $(pwd)"
+          echo "正在搜索目录: ${{ env.DLL_SEARCH_PATH }}"
+          
+          # 调试：显示找到的文件列表
+          echo "找到的.dll文件列表:"
+          find "${{ env.DLL_SEARCH_PATH }}" -name "*.dll" -print
+          
           max_version=0
           for file in $(find "${{ env.DLL_SEARCH_PATH }}" -name "*.dll"); do
+            echo "正在处理文件: $file"
+            
+            # 修正正则表达式匹配括号内数字
             version=$(basename "$file" | grep -oP '$\K\d+(?=$)' || echo "0")
+            echo "提取到的版本号: $version"
+            
+            # 数值比较
             if [ "$version" -gt "$max_version" ]; then
               max_version=$version
+              echo "更新最大版本号为: $max_version"
             fi
           done
           
           if [ "$max_version" -eq 0 ]; then
-            echo "::error::未找到有效版本号"
+            echo "::error::未找到有效版本号 (最终max_version=$max_version)"
             exit 1
           fi
           
-          echo "找到最大版本号: $max_version"
+          echo "最终确定版本号: $max_version"
           echo "VERSION_TAG=$max_version" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
@@ -56,4 +69,4 @@ jobs:
           push: true
           tags: |
             ${{ env.DOCKERHUB_REPO }}:latest
-            ${{ env.DOCKERHUB_REPO }}:${{ env.VERSION_TAG }}
+            ${{ env.DOCKERHUB_REPO }}:  ${{ env.VERSION_TAG }}
