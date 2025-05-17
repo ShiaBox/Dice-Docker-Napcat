@@ -24,25 +24,30 @@ jobs:
           echo "当前工作目录: $(pwd)"
           echo "正在搜索目录: ${{ env.DLL_SEARCH_PATH }}"
           
-          echo "找到的.dll文件列表:"
-          find "${{ env.DLL_SEARCH_PATH }}" -name "*.dll" -print
+          # 调试：显示找到的文件列表
+          find "${{ env.DLL_SEARCH_PATH }}" -name "*.dll" | while read -r file; do
+            echo "找到文件: $file"
+          done
           
           max_version=0
           for file in $(find "${{ env.DLL_SEARCH_PATH }}" -name "*.dll"); do
             echo "正在处理文件: $file"
             
-            filename=$(basename "$file")
-            version=$(echo "$filename" | sed -n 's/.*($[0-9]\{1,\}$).*/\1/p' | head -n1)
-            echo "从文件名 [$filename] 提取到的版本号: $version"
+            # 使用兼容性更强的正则表达式
+            version=$(basename "$file" | sed -nE 's/.*$(.*)$/\1/p' | grep -E '^[0-9]+$' || echo "0")
+            echo "提取到的版本号: $version"
             
-            if [ -n "$version" ] && [ "$version" -gt "$max_version" ]; then
+            # 数值比较
+            if [ "$version" -gt "$max_version" ]; then
               max_version=$version
               echo "更新最大版本号为: $max_version"
             fi
           done
           
           if [ "$max_version" -eq 0 ]; then
-            echo "::error::未找到有效版本号 (请检查文件名格式，示例：filename(123).dll)"
+            echo "::error::未找到有效版本号 (示例期待文件名格式：filename(638).dll)"
+            echo "找到的文件列表："
+            find "${{ env.DLL_SEARCH_PATH }}" -name "*.dll" -ls
             exit 1
           fi
           
