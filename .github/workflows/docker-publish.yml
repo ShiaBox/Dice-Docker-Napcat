@@ -26,13 +26,16 @@ jobs:
             exit 1
           fi
           
-          VERSION_TAG=$(cat last_release.txt | tr -d '\n\r' | grep -Eo '[0-9]+')
+          # 新增处理步骤：删除所有空白字符
+          RAW_CONTENT=$(cat last_release.txt | tr -d '[:space:]')
+          VERSION_TAG=$(echo "$RAW_CONTENT" | grep -Eo '^[0-9]+$')
+          
           if [ -z "$VERSION_TAG" ]; then
-            echo "::error::last_release.txt 中未找到有效版本号"
+            echo "::error::无效版本号格式，文件内容应为纯数字 (当前内容：'$(cat last_release.txt)')"
             exit 1
           fi
           
-          echo "版本号: $VERSION_TAG"
+          echo "有效版本号: $VERSION_TAG"
           echo "VERSION_TAG=$VERSION_TAG" >> $GITHUB_ENV
 
       - name: Set up Docker Buildx
