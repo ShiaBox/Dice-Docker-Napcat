@@ -56,4 +56,4 @@ jobs:
           push: true
           tags: |
             ${{ env.DOCKERHUB_REPO }}:latest
-            ${{ env.DOCKERHUB_REPO }}:  ${{ env.VERSION_TAG }}
+            ${{ env.DOCKERHUB_REPO }}:${{ env.VERSION_TAG }}
